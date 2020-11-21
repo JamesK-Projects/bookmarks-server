@@ -12,3 +12,5 @@
 {"message":"Bookmark with id 779bb8ab-3cb3-450a-bfcf-f19ad90ca1fc deleted","level":"info"}
 {"message":"Unauthorized request to path: /","level":"error"}
 {"message":"Unauthorized request to path: /bookmarks/2","level":"error"}
+{"message":"Unauthorized request to path: /bookmark/12345","level":"error"}
+{"message":"Unauthorized request to path: /bookmark/12345","level":"error"}
