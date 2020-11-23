@@ -1,3 +1,4 @@
+const path = require('path')
 const express = require('express');
 const xss = require('xss')
 const BookmarksService = require('./bookmarks-service');
@@ -43,11 +44,11 @@ bookmarksRouter
                     error: { message: 'Rating must be a number'}
                 })
         }
-        if(newBookmark.rating < 0 || newBookmark.rating > 5){
+        if(newBookmark.rating < 1 || newBookmark.rating > 5){
             return res
                 .status(400)
                 .json({
-                    error: { message: 'Rating must be between 0 and 5'}
+                    error: { message: 'Rating must be between 1 and 5'}
                 })
         }
 
@@ -58,7 +59,7 @@ bookmarksRouter
         .then(bookmark => {
             res
                 .status(201)
-                .location(`/bookmarks/${bookmark.id}`)
+                .location(path.posix.join(req.originalUrl, `/${bookmark.id}`))
                 .json({
                     id: bookmark.id,
                     title: xss(bookmark.title),
@@ -68,13 +69,6 @@ bookmarksRouter
                 })
         })
         .catch(next)
-
-        // if(rating < 0 || rating > 5){
-        //     logger.error('Rating must be between 0 and 5')
-        //     res
-        //         .status(400)
-        //         .send('Invalid data')
-        // }
     })
 
 bookmarksRouter
@@ -110,6 +104,29 @@ bookmarksRouter
             req.params.bookmark_id
         )
         .then(() => {
+            res.status(204).end()
+        })
+        .catch(next)
+    })
+    .patch(jsonParser, (req, res, next) => {
+        const { title, url, rating, description } = req.body
+        const bookmarkToUpdate = { title, url, rating, description }
+
+        const numberOfValues = Object.values(bookmarkToUpdate).filter(Boolean).length
+        if(numberOfValues === 0){
+            return res.status(400).json({
+                error: {
+                    message: `Request body must contain either 'title', 'url', 'rating', or 'description'`
+                }
+            })
+        }
+
+        BookmarksService.updateBookmark(
+            req.app.get('db'),
+            req.params.bookmark_id,
+            bookmarkToUpdate
+        )
+        .then(numRowsAffected => {
             res.status(204).end()
         })
         .catch(next)
